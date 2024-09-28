@@ -2,6 +2,11 @@ from gtts import gTTS
 from moviepy.editor import *
 import os
 import threading
+import re
+
+text = """
+Po pierwsze, jednym z najważniejszych atutów systemu Linux jest jego otwartość. Linux jest systemem typu open source, co oznacza, że jego kod źródłowy jest dostępny dla każdego. Dzięki temu programiści z całego świata mogą wprowadzać poprawki, rozwijać nowe funkcje i dostosowywać system do swoich potrzeb. To sprzyja innowacjom i przyspiesza rozwój oprogramowania. W przeciwieństwie do tego, Windows jest systemem zamkniętym, co ogranicza możliwości jego modyfikacji i dostosowywania.
+"""
 
 # Funkcja do generowania plików audio
 def generate_audio(text, index):
@@ -20,7 +25,7 @@ def create_video_with_subtitle(audio_file, text, index):
     video_clip = ColorClip(size=(1920, 1080), color=(0, 0, 0), duration=duration)
     
     # Dodajemy napisy do klipu
-    txt_clip = TextClip(text, fontsize=40, color='green', size=video_clip.size, print_cmd=True)
+    txt_clip = TextClip(text, fontsize=40, color='green', size=video_clip.size, method="caption", print_cmd=True)
     txt_clip = txt_clip.set_position('center').set_duration(duration)
     
     # Łączymy wideo i napisy
@@ -38,11 +43,8 @@ def combine_videos(video_files):
     final_clip = concatenate_videoclips(clips)
     final_clip.write_videofile("final_video.mp4", fps=24)
 
-# Wypowiedź do podziału
-speech = "To jest pierwsze zdanie. A to jest drugie zdanie. Tutaj mamy trzecie zdanie."
-
 # Dzielimy tekst na zdania
-sentences = speech.split('. ')
+sentences = re.split(r'[.,!?]', text)
 audio_files = []
 video_files = []
 
