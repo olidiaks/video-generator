@@ -5,7 +5,7 @@ import threading
 import re
 
 text = """
-Po pierwsze, jednym z najważniejszych atutów systemu Linux jest jego otwartość. Linux jest systemem typu open source, co oznacza, że jego kod źródłowy jest dostępny dla każdego. Dzięki temu programiści z całego świata mogą wprowadzać poprawki, rozwijać nowe funkcje i dostosowywać system do swoich potrzeb. To sprzyja innowacjom i przyspiesza rozwój oprogramowania. W przeciwieństwie do tego, Windows jest systemem zamkniętym, co ogranicza możliwości jego modyfikacji i dostosowywania.
+Po pierwsze jednym z najważniejszych atutów systemu Linux jest jego otwartość. Linux jest systemem typu open source co oznacza że jego kod źródłowy jest dostępny dla każdego. Dzięki temu programiści z całego świata mogą wprowadzać poprawki, rozwijać nowe funkcje i dostosowywać system do swoich potrzeb. To sprzyja innowacjom i przyspiesza rozwój oprogramowania. W przeciwieństwie do tego, Windows jest systemem zamkniętym, co ogranicza możliwości jego modyfikacji i dostosowywania.
 """
 
 # Funkcja do generowania plików audio
