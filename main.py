@@ -1,6 +1,6 @@
-from moviepy.editor import TextClip, concatenate_videoclips, CompositeVideoClip
+from moviepy.editor import TextClip, concatenate_videoclips, CompositeVideoClip, AudioFileClip
 from gtts import gTTS
-from moviepy.audio.AudioClip import AudioFileClip
+from pydub import AudioSegment
 import os
 
 
@@ -26,6 +26,10 @@ def generate_audio(text, filename="narration.mp3"):
     tts = gTTS(text, lang='pl')
     tts.save(filename)
 
+    # Konwertuj MP3 na WAV
+    audio = AudioSegment.from_mp3("narration.mp3")
+    audio.export("narration.wav", format="wav")
+
 def generate_video_with_audio(text, output_filename="filmik_z_lektorem.mp4"):
     # Generowanie narracji audio
     generate_audio(text)
@@ -37,8 +41,8 @@ def generate_video_with_audio(text, output_filename="filmik_z_lektorem.mp4"):
 
     for line in lines:
         # Długość wyświetlania tekstu zależna od długości linii (3 sekundy na linijkę jako przykład)
-        duration = max(3, len(line) * 0.1)  # np. 3 sekundy minimalnie, 0.1 sekundy na znak
-        text_clip = TextClip(line, fontsize=50, color='white', size=(1280, 720), bg_color='black', method='caption').set_duration(duration)
+        duration = max(3, len(line))  # np. 3 sekundy minimalnie, 0.1 sekundy na znak
+        text_clip = TextClip(line, fontsize=50, color='green', size=(1280, 720), bg_color='black', method='caption').set_duration(duration)
         video_clips.append(text_clip)
         total_duration += duration
 
@@ -46,7 +50,7 @@ def generate_video_with_audio(text, output_filename="filmik_z_lektorem.mp4"):
     final_video = concatenate_videoclips(video_clips)
 
     # Dodanie audio do wideo
-    audio = AudioFileClip("narration.mp3").subclip(0, total_duration)
+    audio = AudioFileClip("narration.wav").subclip(0, total_duration)
     final_video = final_video.set_audio(audio)
 
     # Zapisanie do pliku
