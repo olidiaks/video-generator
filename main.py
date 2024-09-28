@@ -1,60 +1,131 @@
-from moviepy.editor import TextClip, concatenate_videoclips, CompositeVideoClip, AudioFileClip
-from gtts import gTTS
-from pydub import AudioSegment
+import moviepy.editor as mp
 import os
+from gtts import gTTS
+import re
 
+os.environ["IMAGEMAGICK_BINARY"] = "/usr/local/bin/magick"
 
-text = """
-Buty są nieodłącznym elementem naszego codziennego życia. Niezależnie od tego, czy idziemy do pracy, szkoły, czy po prostu na spacer, odpowiednie buty mają ogromne znaczenie. Ale czy kiedykolwiek zastanawiałeś się, jak buty zmieniały się na przestrzeni wieków?
+def generate_video(text):
+    try:
+        lang = 'pl'
+        font_color = 'green'
+        background_color = 'black'
+        background_opacity =  1.0  # Default opacity is 1.0 (no transparency)
+        font_size = 70  # Default font size is 70
+        text_speed = 0.5  # Default text speed (adjust as needed)
+        background_image_path = ''  # Path to background image (optional)
 
-Pierwsze buty powstały tysiące lat temu. Były to proste kawałki skóry, które miały za zadanie chronić stopy przed trudnym terenem. W miarę rozwoju cywilizacji, buty zaczęły nabierać bardziej złożonych form. W starożytnym Egipcie noszono sandały wykonane z papirusu, które stały się symbolem statusu. W Rzymie legioniści maszerowali w solidnych, skórzanych butach, które chroniły ich podczas długich marszów.
+        # Generate voiceover using gTTS with the specified voice
+        tts = gTTS(text=text, lang=lang)
+        tts.save('voiceover.mp3')
+        print("Voiceover generated")
 
-W średniowieczu buty stały się bardziej ozdobne. Wysokie, szpiczaste buty, zwane poulaines, były popularne wśród europejskiej szlachty. Były one niepraktyczne, ale symbolizowały bogactwo i pozycję społeczną. Im dłuższy czubek buta, tym wyższy status właściciela.
+        # Split the text into sentences using commas (',') and punctuation
+        sentences = re.split(r'[.,!?]', text)
 
-Jednak to dopiero w XVIII i XIX wieku buty zaczęły przybierać formy, które są nam dziś bardziej znane. Wynalazek maszyn do szycia zrewolucjonizował produkcję obuwia, umożliwiając masową produkcję i dostępność dla szerszej publiczności. Buty stały się bardziej zróżnicowane pod względem stylu, koloru i funkcji.
+        # Create a list to store TextClips for each sentence
+        sentence_clips = []
 
-Współczesne buty to prawdziwe arcydzieła inżynierii i mody. Mamy buty do biegania, buty na specjalne okazje, buty trekkingowe, a także buty codzienne. Każda para butów ma swoje specyficzne zastosowanie. Buty sportowe, takie jak te produkowane przez marki jak Nike czy Adidas, są wynikiem lat badań nad ergonomią, komfortem i wydajnością.
+        # Calculate the duration for each sentence based on audio duration
+        audio_duration = mp.AudioFileClip('voiceover.mp3').duration
+        sentence_duration = audio_duration / len(sentences)
 
-Moda na buty stale się zmienia. W ostatnich latach popularne stały się buty minimalistyczne, które mają na celu naśladowanie naturalnego ruchu stopy. Z drugiej strony, sneakersy stały się częścią popkultury, z limitowanymi edycjami osiągającymi ceny rzędu tysięcy dolarów.
+        current_time = 0
 
-Nie można też zapomnieć o wpływie, jaki mają buty na nasze zdrowie. Dobrze dobrana para butów może znacząco poprawić komfort codziennego życia, podczas gdy źle dobrane buty mogą prowadzić do problemów zdrowotnych, takich jak bóle kręgosłupa czy problemy z postawą.
+        for sentence in sentences:
+            # Skip empty sentences
+            if not sentence.strip():
+                continue
 
-Podsumowując, buty to nie tylko część garderoby, ale także ważny element naszej historii i kultury. To, jakie buty wybieramy, mówi wiele o nas samych, naszej osobowości i stylu życia. Dlatego warto zwrócić uwagę na jakość i dopasowanie obuwia, ponieważ to one wspierają nas na każdym kroku.
-"""
+            # Create a TextClip centered on the screen
+            if background_image_path:
+                # Load the background image and resize it to match the text clip size
+                bg_image = mp.ImageClip(background_image_path)
+                bg_image = bg_image.resize(size=(1500, 1000))  # Adjust the size as needed
 
-def generate_audio(text, filename="narration.mp3"):
-    tts = gTTS(text, lang='pl')
-    tts.save(filename)
+                # Create a TextClip with background image
+                word_clip = mp.TextClip(
+                    sentence.strip(),
+                    fontsize=font_size,
+                    color=font_color,
+                    bg_color=background_color,
+                    size=(1500, 1000)
+                )
+                word_clip = word_clip.set_duration(sentence_duration)
+                word_clip = word_clip.set_start(current_time)
 
-    # Konwertuj MP3 na WAV
-    audio = AudioSegment.from_mp3("narration.mp3")
-    audio.export("narration.wav", format="wav")
+                # Create a semi-transparent background color clip
+                bg_color_clip = mp.ColorClip(
+                    size=(1500, 1000),
+                    color=background_color,
+                    duration=sentence_duration,
+                    is_mask=True,
+                    opacity=background_opacity
+                )
 
-def generate_video_with_audio(text, output_filename="filmik_z_lektorem.mp4"):
-    # Generowanie narracji audio
-    generate_audio(text)
-    
-    # Dzielimy tekst na linijki i generujemy osobne klipy tekstowe
-    lines = text.split(". ")
-    video_clips = []
-    total_duration = 0
+                # Composite the background color clip, background image, and text clip
+                sentence_clip = mp.CompositeVideoClip([bg_color_clip, bg_image.set_duration(sentence_duration), word_clip])
+            else:
+                # Create a TextClip without background image
+                sentence_clip = mp.TextClip(
+                    sentence.strip(),
+                    fontsize=font_size,
+                    color=font_color,
+                    bg_color=background_color,
+                    size=(1500, 1000)
+                )
+                sentence_clip = sentence_clip.set_duration(sentence_duration)
+                sentence_clip = sentence_clip.set_start(current_time)
 
-    for line in lines:
-        # Długość wyświetlania tekstu zależna od długości linii (3 sekundy na linijkę jako przykład)
-        duration = max(3, len(line))  # np. 3 sekundy minimalnie, 0.1 sekundy na znak
-        text_clip = TextClip(line, fontsize=50, color='green', size=(1280, 720), bg_color='black', method='caption').set_duration(duration)
-        video_clips.append(text_clip)
-        total_duration += duration
+            sentence_clips.append(sentence_clip)
+            current_time += sentence_duration
 
-    # Połączenie wszystkich klipów tekstowych w jeden
-    final_video = concatenate_videoclips(video_clips)
+        # Create a final CompositeVideoClip for all sentences
+        text_clip = mp.concatenate_videoclips(sentence_clips, method="compose")
 
-    # Dodanie audio do wideo
-    audio = AudioFileClip("narration.wav").subclip(0, total_duration)
-    final_video = final_video.set_audio(audio)
+        # Create an audio clip from the generated voiceover
+        audio_clip = mp.AudioFileClip('voiceover.mp3')
 
-    # Zapisanie do pliku
-    final_video.write_videofile(output_filename, fps=24)
+        # Set the audio for the text clip
+        text_clip = text_clip.set_audio(audio_clip)
 
-# Przykład użycia
-generate_video_with_audio(text, output_filename="filmik_z_lektorem.mp4")
+        # Set the duration for the text clip (same as audio duration)
+        text_clip = text_clip.set_duration(audio_duration)
+
+        # Set the fps for the text clip (e.g., 24 fps)
+        text_clip = text_clip.set_fps(24)  # Adjust the value as needed
+
+        # Define the directory for saving the video file
+        output_directory = 'VSL'
+        os.makedirs(output_directory, exist_ok=True)  # Ensure the directory exists
+
+        # Write the video file using moviepy
+        video_output_path = os.path.join(output_directory, 'voiceover_output.mp4')
+        text_clip.write_videofile(video_output_path, codec='libx264', audio_codec='aac')
+        print("Video generated")
+
+        # Clean up temporary files
+        os.remove('voiceover.mp3')
+        print("Temporary files cleaned up")
+
+        # Return the generated video file path
+
+    except Exception as e:
+        error_message = f'Error: {e}'
+        print(error_message)  # Log the specific error message
+
+generate_video("""
+Rozprawka na temat: Dlaczego Linux jest lepszy niż Windows
+
+W dzisiejszym świecie technologii operacyjny system komputerowy odgrywa kluczową rolę w codziennym użytkowaniu urządzeń. Wśród najpopularniejszych systemów operacyjnych wyróżniają się dwa dominujące: Linux i Windows. Choć każdy z nich ma swoje zalety i wady, wiele argumentów wskazuje, że Linux jest lepszym wyborem niż Windows.
+
+Po pierwsze, jednym z najważniejszych atutów systemu Linux jest jego otwartość. Linux jest systemem typu open source, co oznacza, że jego kod źródłowy jest dostępny dla każdego. Dzięki temu programiści z całego świata mogą wprowadzać poprawki, rozwijać nowe funkcje i dostosowywać system do swoich potrzeb. To sprzyja innowacjom i przyspiesza rozwój oprogramowania. W przeciwieństwie do tego, Windows jest systemem zamkniętym, co ogranicza możliwości jego modyfikacji i dostosowywania.
+
+Kolejnym argumentem na rzecz Linuxa jest jego bezpieczeństwo. Ze względu na swoją architekturę oraz fakt, że jest mniej popularny niż Windows, Linux jest mniej narażony na ataki złośliwego oprogramowania i wirusów. Systemy Linux mają wbudowane mechanizmy ochrony, a także regularne aktualizacje, które pozwalają na eliminację ewentualnych luk bezpieczeństwa. Użytkownicy systemu Windows często muszą zmagać się z problemami związanymi z wirusami i złośliwym oprogramowaniem, co może prowadzić do utraty danych i problemów z wydajnością.
+
+Dodatkowo, Linux oferuje lepszą wydajność na starszym sprzęcie. Wiele dystrybucji Linuxa, takich jak Ubuntu, Fedora czy Mint, zostało zoptymalizowanych tak, aby działały płynnie nawet na komputerach o ograniczonych zasobach. Użytkownicy, którzy nie chcą inwestować w nowy sprzęt, mogą z powodzeniem korzystać z Linuxa na starszych maszynach, co nie zawsze jest możliwe w przypadku Windows.
+
+Nie można także pominąć aspektu kosztów. Linux jest dostępny za darmo, co sprawia, że jest atrakcyjną opcją zarówno dla użytkowników indywidualnych, jak i firm. W przeciwieństwie do tego, licencje na system Windows są kosztowne i mogą stanowić znaczną część budżetu dla wielu użytkowników. Korzystanie z Linuxa pozwala zaoszczędzić pieniądze, które można przeznaczyć na inne aspekty działalności.
+
+Podsumowując, istnieje wiele powodów, dla których Linux może być uważany za lepszy system operacyjny niż Windows. Otwartość kodu źródłowego, lepsze bezpieczeństwo, wydajność na starszym sprzęcie oraz brak kosztów związanych z licencjonowaniem to tylko niektóre z nich. Choć wybór systemu operacyjnego jest subiektywny i zależy od indywidualnych potrzeb użytkowników, Linux bez wątpienia zasługuje na uwagę i uznanie.
+""")
