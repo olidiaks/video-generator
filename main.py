@@ -1,8 +1,21 @@
+"""
+Copytight (c) 2024 Oliwier Stępniak
+This program will generate a video where text is displayed on the screen while it is read aloud. The text should be assigned to the text variable, and the language of the text should be specified by modifying the lang variable.
+
+     This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+     You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA. Also add information on how to contact you by electronic and paper mail.
+"""
+
 from gtts import gTTS
 from moviepy.editor import *
 import os
 import threading
 import re
+
+lang = 'pl'
 
 text = """
 ZASADA: KISS, DRY, YAGNI..
@@ -168,7 +181,7 @@ Scenariusz testowy to ogólny opis funkcjonalności, którą chcemy przetestowa�
 
 # Funkcja do generowania plików audio
 def generate_audio(text, index):
-    tts = gTTS(text, lang='pl')  # język polski
+    tts = gTTS(text, lang=lang) 
     audio_file = f"audio_{index}.mp3"
     tts.save(audio_file)
     return audio_file
@@ -191,7 +204,7 @@ def create_video_with_subtitle(audio_file, text, index):
     
     # Eksportujemy klip
     video_with_subtitle_file = f"video_{index}.mp4"
-    video_with_subtitle.write_videofile(video_with_subtitle_file, fps=10)
+    video_with_subtitle.write_videofile(video_with_subtitle_file, fps=1)
     
     return video_with_subtitle_file
 
@@ -199,7 +212,7 @@ def create_video_with_subtitle(audio_file, text, index):
 def combine_videos(video_files):
     clips = [VideoFileClip(vf) for vf in video_files]
     final_clip = concatenate_videoclips(clips)
-    final_clip.write_videofile("final_video.mp4", fps=24)
+    final_clip.write_videofile("final_video.mp4", fps=1)
 
 # Dzielimy tekst na zdania
 sentences = re.split(r'[.!?]', text)
