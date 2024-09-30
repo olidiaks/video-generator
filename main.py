@@ -70,7 +70,7 @@ for i, sentence in enumerate(sentences):
         video_file = create_video_with_subtitle(audio_file, sentence.strip(), i)
         video_files.append(video_file)
         
-        print(f"Zdanie {i+1}: {sentence.strip()}")
+        print(f"Sentenc {i+1}: {sentence.strip()}")
 
 
 combine_videos(video_files)
@@ -80,4 +80,4 @@ for audio_file in audio_files:
 for video_file in video_files:
     os.remove(video_file)
 
-print("Wszystkie klipy wideo zostały połączone w 'final_video.mp4'")
+print("All video clips where concat in to 'final_video.mp4'")
