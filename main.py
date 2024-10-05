@@ -43,7 +43,7 @@ def create_video_with_subtitle(audio_file, text, index):
     
     video_clip = ColorClip(size=(1920, 1080), color=(0, 0, 0), duration=duration)
     
-    txt_clip = TextClip(text, fontsize=40, color='green', size=video_clip.size, method="caption", print_cmd=True)
+    txt_clip = TextClip(text, fontsize=40, color='white', size=video_clip.size, method="caption", print_cmd=True)
     txt_clip = txt_clip.set_position('center').set_duration(duration)
     
     video_with_subtitle = CompositeVideoClip([video_clip, txt_clip]).set_audio(audio_clip)
