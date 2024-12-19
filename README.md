@@ -6,12 +6,14 @@ To get started with this project, simply fork the repository or download it dire
 
 We welcome your suggestions for improvements or features! If you have any ideas, please don’t hesitate to share.
 
-### Contribution Requests
+
+## Contribution Requests
 
 I'm looking for help with the following enhancements:
 - **Multithreading:** Improve the program's performance by enabling it to run across multiple threads. I’m currently limited in my Python skills for this task.
 - **GUI Development:** Create a user-friendly graphical interface to make the tool more accessible for non-technical users.
 - **Cross-Platform Testing:** Verify functionality on Windows and macOS (OS X).
+
 
 ## Installation (Linux, with potential for other OS)
 
@@ -43,6 +45,7 @@ I'm looking for help with the following enhancements:
    ```
    Sit back and wait for your movie to be generated!
 
+
 ## Features
 
 - **Text-to-Speech Conversion:** 
@@ -57,6 +60,7 @@ I'm looking for help with the following enhancements:
 - **Automated Cleanup:** 
   Cleans up by deleting temporary audio and video files after the final video is created.
 
+
 ## How It Works
 
 1. **Audio Generation:**  
@@ -70,6 +74,8 @@ I'm looking for help with the following enhancements:
 
 4. **Cleanup:**  
    Temporary audio and video files are automatically removed once the final video is completed.
+
+---
 
 ## Requirements
 
